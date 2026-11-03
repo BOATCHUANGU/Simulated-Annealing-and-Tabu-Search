@@ -1,17 +1,25 @@
 #include <bits/stdc++.h>
+#include "Config.h"
 using namespace std;
+// using vector<int> = vector<int>;
 
-using State = vector<int>;
+struct TSConfig {
+    int maxIter = 5000;
+    int candidateCount = 40;
+    int tabuTenure = 20;
+    double stepSize = 0.08;
+};
+
 class TS {
   public:
     // 需要自己实现
-    double evaluate(const State &s) {
+    double evaluate(const vector<int> &s) {
         // TODO
         return 0;
     }
 
     // 生成邻居：随机交换两个位置
-    State neighbor(State s, mt19937 &rng) {
+    vector<int> neighbor(vector<int> s, mt19937 &rng) {
         if (s.size() < 2)
             return s;
 
@@ -25,23 +33,23 @@ class TS {
         return s;
     }
 
-    State TabuSearch(State cur, int maxIter = 10000, int tabuTenure = 20) {
+    vector<int> TabuSearch(vector<int> cur, int maxIter = 10000, int tabuTenure = 20) {
         mt19937 rng(chrono::steady_clock::now().time_since_epoch().count());
 
-        State best = cur;
+        vector<int> best = cur;
         double bestVal = evaluate(best);
 
         // 记录方案及其禁忌到期时间
-        map<State, int> tabu;
+        map<vector<int>, int> tabu;
 
         for (int iter = 0; iter < maxIter; iter++) {
-            State chosen;
+            vector<int> chosen;
             double chosenVal = 1e100;
             bool found = false;
 
             // 每轮生成一批候选邻居
             for (int k = 0; k < 50; k++) {
-                State nxt = neighbor(cur, rng);
+                vector<int> nxt = neighbor(cur, rng);
                 double val = evaluate(nxt);
 
                 bool forbidden = tabu.count(nxt) && tabu[nxt] > iter;

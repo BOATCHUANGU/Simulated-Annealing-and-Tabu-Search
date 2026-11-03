@@ -1,6 +1,16 @@
 #include <bits/stdc++.h>
+#include "Config.h"
 using namespace std;
+
 using ll = long long;
+
+
+struct SAConfig {
+    double T0 = 1000;
+    double Tmin = 1e-3;
+    double cooling = 0.995;
+    int inner = 100;
+};
 
 class SA_solution {
   public:
@@ -20,19 +30,19 @@ class SA_solution {
         return s;
     }
 
-    vector<int> SA(vector<int> cur, double T = 1000, double Tmin = 1e-3,
-                   double cooling = 0.995) {
+    vector<int> SA(vector<int> cur, SAConfig x) {
         vector<int> best = cur;
         double curVal = evaluate(cur);
         double bestVal = curVal;
-        while (T > Tmin) {
+    
+        while (x.T0 > x.Tmin) {
             for (int i = 0; i < 100; i++) {
                 vector<int> nxt = neighbor(cur);
                 double nxtVal = evaluate(nxt);
                 double delta = nxtVal - curVal;
 
                 // 更优必收；更差按概率接受
-                if (delta < 0 || rand01() < exp(-delta / T)) {
+                if (delta < 0 || rand01() < exp(-delta / x.T0)) {
                     cur = nxt;
                     curVal = nxtVal;
                 }
@@ -43,7 +53,7 @@ class SA_solution {
                 }
             }
 
-            T *= cooling; // 降温
+            x.T0 *= x.cooling; // 降温
         }
         return best;
     }
