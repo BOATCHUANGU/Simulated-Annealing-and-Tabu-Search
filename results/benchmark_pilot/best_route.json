@@ -1,0 +1,9 @@
+{
+  "instance": "C101",
+  "algorithm": "sa",
+  "seed": 8,
+  "vehicles": 12,
+  "distance": 947.7537316964496,
+  "proper_crossings": 7,
+  "crossing_definition": "strict geometric crossings; shared endpoints and collinear overlaps excluded"
+}
