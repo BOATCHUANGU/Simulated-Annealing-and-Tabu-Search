@@ -42,8 +42,8 @@ def run_benchmark(output, instances, algorithms, repetitions, config, customers=
 def main():
     parser = argparse.ArgumentParser(description="VRPTW 基准实验；相同输出目录与参数可续跑")
     parser.add_argument("--out", type=Path, default=RESULTS_DIR / "benchmark")
-    parser.add_argument("--instances", nargs="+", choices=INSTANCES, default=list(INSTANCES))
-    parser.add_argument("--algorithms", nargs="+", choices=list(SOLVERS), default=list(SOLVERS))
+    parser.add_argument("--instances", nargs="+", default=list(INSTANCES))  # choices=INSTANCES
+    parser.add_argument("--algorithms", nargs="+", default=list(SOLVERS))  # choices=list(SOLVERS)
     parser.add_argument("--repetitions", type=int, default=30)
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--iterations", type=int, default=1000)

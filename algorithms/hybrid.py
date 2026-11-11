@@ -1,11 +1,10 @@
-"""三种 SA + TS 混合框架，统一返回 SearchResult。"""
+#三种方案
 from algorithms.common import SearchConfig, SearchState, accept
 from algorithms.neighborhoods import candidate
 from algorithms.ts import candidates, commit, step
 
 
-def ts_metropolis(problem, parameters=None):
-    """方案一：禁忌筛选后按 Metropolis 接受候选。"""
+def ts_metropolis(problem, parameters=None): #方案一：禁忌筛选后按退火准则接受，返回搜索结果。 	SA 和 TS 每一步一起用
     config = parameters or SearchConfig()
     state = SearchState(problem, config)
     tabu = {}
@@ -14,16 +13,15 @@ def ts_metropolis(problem, parameters=None):
         if state.time_expired() or temperature < config.min_temperature:
             break
         for item in candidates(state, tabu, iteration):
-            if accept(problem, state.current, item[1], temperature, state.rng):
+            if accept(problem, state.current, item[1], temperature, state.rng): #
                 commit(state, item, tabu, iteration)
                 break
         state.record()
         temperature *= config.cooling
-    return state.result()
+    return state.result("min_temperature" if temperature < config.min_temperature and not state.time_expired() and state.steps < config.iterations else None)
 
 
-def sa_ts_inner(problem, parameters=None):
-    """方案二：每个温度层进行 TS 精搜，层间按 Metropolis 决定是否转移。"""
+def sa_ts_inner(problem, parameters=None): #方案二：外层退火、内层禁忌搜索，返回搜索结果。 	SA 控制外层，TS 在每一层连续搜索
     config = parameters or SearchConfig()
     state = SearchState(problem, config)
     tabu = {}
@@ -37,14 +35,14 @@ def sa_ts_inner(problem, parameters=None):
             step(state, tabu, iteration)
             state.record()
             iteration += 1
-        if not accept(problem, start_solution, state.current, temperature, state.rng):
+        if not accept(problem, start_solution, state.current, temperature, state.rng): #Metropolis
             state.order, state.current = start_order, start_solution
         temperature *= config.cooling
-    return state.result()
+    return state.result("min_temperature" if temperature < config.min_temperature and not state.time_expired() and state.steps < config.iterations else None)
 
 
-def _anneal(state, steps):
-    """执行一段 SA，用于暖启动或停滞后的扰动。"""
+def _anneal(state, steps): #执行一段退火并更新状态；无返回值。 不重新构造初始解，利用之前搜索得到的解，继续进行模拟退火
+    """暖启动"""
     config = state.config
     temperature = config.initial_temperature
     for _ in range(steps):
@@ -57,8 +55,7 @@ def _anneal(state, steps):
         temperature = max(config.min_temperature, temperature * config.cooling)
 
 
-def sa_warm_ts(problem, parameters=None):
-    """方案三 b：SA 暖启动、TS 精修，停滞后从最优解 SA 扰动重启。"""
+def sa_warm_ts(problem, parameters=None): #方案三：退火暖启动、禁忌精修和重启，返回搜索结果。 	先 SA、后 TS，卡住后再用 SA 扰动
     config = parameters or SearchConfig()
     state = SearchState(problem, config)
     tabu = {}

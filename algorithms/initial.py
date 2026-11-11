@@ -1,14 +1,14 @@
-"""两种初始排列：随机与最近可行客户贪心。"""
+#初始解构造
 import random
 
 
-def random_order(problem, seed=0):
+def random_order(problem, seed=0): #随机排列客户，返回不含车场的客户列表。
     order = sorted(set(problem.customers) - {0})
     random.Random(seed).shuffle(order)
     return order
 
 
-def greedy_order(problem):
+def greedy_order(problem): #按最近可行客户构造初始解，返回客户排列。
     remaining = set(problem.customers) - {0}
     routes = []
     while remaining:
@@ -27,8 +27,7 @@ def greedy_order(problem):
     return [node for route in routes for node in route]
 
 
-def insertion_order(problem):
-    """按时间窗截止时间排序，以最小增量插入已有可行路线。"""
+def insertion_order(problem): #按时间窗和插入代价构造初始解，返回客户排列。
     routes = []
     customers = sorted(set(problem.customers) - {0}, key=lambda i: (problem.customers[i].due, i))
     for node in customers:

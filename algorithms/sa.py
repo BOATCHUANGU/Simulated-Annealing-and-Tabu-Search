@@ -1,9 +1,8 @@
-"""纯模拟退火。"""
 from algorithms.common import SearchConfig, SearchState, accept
 from algorithms.neighborhoods import candidate
 
 
-def solve(problem, parameters=None):
+def solve(problem, parameters=None): #运行模拟退火，返回包含最优解和运行记录的结果。
     config = parameters or SearchConfig()
     state = SearchState(problem, config)
     temperature = config.initial_temperature
@@ -15,4 +14,4 @@ def solve(problem, parameters=None):
             state.update(item[0].order, item[1])
         state.record()
         temperature *= config.cooling
-    return state.result()
+    return state.result("min_temperature" if temperature < config.min_temperature and not state.time_expired() and state.steps < config.iterations else None)

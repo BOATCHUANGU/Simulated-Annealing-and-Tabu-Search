@@ -1,0 +1,9 @@
+{
+  "instance": "C101",
+  "algorithm": "hybrid1",
+  "seed": 8,
+  "vehicles": 11,
+  "distance": 1120.9609922995162,
+  "proper_crossings": 34,
+  "crossing_definition": "strict geometric crossings; shared endpoints and collinear overlaps excluded"
+}

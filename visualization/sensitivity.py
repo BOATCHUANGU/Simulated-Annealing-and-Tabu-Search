@@ -13,14 +13,16 @@ def draw_factor(axes, summary, groups, factor, title):
     for vehicles in sorted({r["vehicles"] for r in levels}):
         values = {r["level"]: r["mean_distance"] for r in levels if r["vehicles"] == vehicles}
         axes[0].plot(x, [values.get(label, float("nan")) for label in labels], marker="o", label=f"{vehicles} vehicles")
-    axes[0].set_ylabel("Mean distance")
+    axes[0].set_ylabel("Mean distance (coordinate units)")
     axes[0].set_title(title)
     axes[0].set_xticks(x, labels)
     axes[0].legend()
     axes[1].plot(x, [r["best_vehicles"] for r in rows], marker="o", color="darkred")
-    axes[1].set_ylabel("Best vehicle count")
+    axes[1].set_ylabel("Best vehicle count (vehicles)")
     axes[1].set_xticks(x, labels)
-    axes[1].set_xlabel("Level")
+    axes[1].set_xlabel({"tabu_tenure": "Tabu tenure (iterations)",
+                        "candidate_count": "Candidate count (per iteration)",
+                        "neighborhoods": "Enabled neighborhood combination"}[factor])
     for ax in axes:
         ax.grid(alpha=0.25)
 

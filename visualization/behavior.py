@@ -10,8 +10,8 @@ def plot_convergence(records, output, instance, seed):
     for r in selected:
         axes[0].plot([h[0] for h in r["history"]], label=r["algorithm"], alpha=0.8)
         axes[1].plot([h[1] for h in r["history"]], label=r["algorithm"], alpha=0.8)
-    axes[0].set(title=f"{instance}: convergence, seed {seed}", ylabel="Best vehicles")
-    axes[1].set(xlabel="Iteration", ylabel="Distance of best solution")
+    axes[0].set(title=f"{instance}: convergence, seed {seed}", ylabel="Best vehicle count (vehicles)")
+    axes[1].set(xlabel="Search iteration", ylabel="Best solution distance (coordinate units)")
     axes[0].legend()
     for ax in axes:
         ax.grid(alpha=0.25)

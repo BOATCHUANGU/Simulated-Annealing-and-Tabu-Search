@@ -1,4 +1,4 @@
-"""C101 前 10 客户的路径枚举与 PuLP 集合划分精确验证。"""
+"""C101 前 10 客户的路径枚举与 PuLP 集合划分求解。"""
 from math import hypot
 import pulp
 from problems.vrptw import VRPTW

@@ -19,15 +19,14 @@ def run(problem, algorithm, parameters=None):
 
 
 def prepare_output(output, manifest):
-    """验证续跑参数并读取已有运行记录。"""
+    """准备输出目录并读取已有运行记录。"""
     output = Path(output)
     output.mkdir(parents=True, exist_ok=True)
     manifest = json.loads(json.dumps(manifest))  # 元组与 JSON 列表保持一致
     path = output / "config.json"
-    if path.exists():
-        if json.loads(path.read_text(encoding="utf-8")) != manifest:
-            raise ValueError("输出目录已有不同实验参数，请使用新目录")
-    else:
+    if path.exists() and json.loads(path.read_text(encoding="utf-8")) != manifest:
+        raise ValueError("输出目录已有不同实验参数，请使用新目录")
+    if not path.exists():
         path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
     raw = output / "runs.jsonl"
     records = [json.loads(line) for line in raw.read_text(encoding="utf-8").splitlines()] if raw.exists() else []

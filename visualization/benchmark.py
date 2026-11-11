@@ -41,8 +41,8 @@ def make_figures(output):
             continue
         axes[0].plot([p[0] for p in row["history"]], label=row["algorithm"])
         axes[1].plot([p[1] for p in row["history"]], label=row["algorithm"])
-    axes[0].set(ylabel="Vehicles", title=f"{instance} convergence, seed {seed}")
-    axes[1].set(xlabel="Iteration", ylabel="Distance")
+    axes[0].set(ylabel="Best vehicle count (vehicles)", title=f"{instance} convergence, seed {seed}")
+    axes[1].set(xlabel="Search iteration", ylabel="Best solution distance (coordinate units)")
     axes[0].legend()
     fig.savefig(output / "convergence.png", dpi=150)
     plt.close(fig)
@@ -56,7 +56,7 @@ def make_figures(output):
                 marker=".", linewidth=1, color=colors(i/max(1, len(best["routes"])-1)))
     depot = problem.customers[0]
     ax.scatter([depot.x], [depot.y], color="black", marker="s", s=50, label="Depot", zorder=5)
-    ax.set(title=f"{instance} best: {best['algorithm']}, {best['vehicles']} vehicles, {best['distance']:.2f}", xlabel="X", ylabel="Y", aspect="equal")
+    ax.set(title=f"{instance} best: {best['algorithm']}, {best['vehicles']} vehicles, {best['distance']:.2f}", xlabel="Customer / depot X coordinate (dataset units)", ylabel="Customer / depot Y coordinate (dataset units)", aspect="equal")
     ax.legend()
     fig.savefig(output / "best_route.png", dpi=150)
     plt.close(fig)

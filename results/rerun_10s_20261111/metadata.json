@@ -1,0 +1,35 @@
+{
+  "python": "3.13.3",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "logical_cpu_count": 32,
+  "workers": 8,
+  "time_budget_seconds": 10.0,
+  "iterations": 100000,
+  "seeds": [
+    0,
+    29
+  ],
+  "cooling_unchanged": true,
+  "source_sha256": {
+    "algorithms\\common.py": "915abedb1c7e595793b408245af1cc829abc02664851137e0c3258e888285c66",
+    "algorithms\\hybrid.py": "51a01369932765f5f4325a1dc39cd5aa0f6f88832ede2835bfb9a31782bb66f9",
+    "algorithms\\initial.py": "7f46932b53ae41c43f3abf0ff040c4b9876ab7b0b588ebb5cf3afd4eb116253b",
+    "algorithms\\neighborhoods.py": "357543a8d494bc021100b86256ce77da6d61c0a6069e8d22b999aa746e4dffdc",
+    "algorithms\\sa.py": "46eb3defc64e4284eb23ac13a9cfaccffe140f408b07f87cd260c4a525b39c5d",
+    "algorithms\\ts.py": "cf40344ed8280fdd7c0d29dc37878d50161fc17bd2db1aa2449ce0a9ac9058a5",
+    "problems\\vrptw.py": "944ede521155a39044d24c47d41192d1247dfa7cd00f062092b73a3aa1f12803",
+    "experiments\\behavior.py": "c8f96c101b5496165e33c0ac702654d37967891088fcc52ab7b73c5456283681",
+    "experiments\\benchmark.py": "6c2fbbb2e265dfa42fea7053435717c096c7658d38988907f2461e97d24714b0",
+    "experiments\\long_budget.py": "288148566654d298728538c5ef8f06f9d23883caf019042568e291efa0dee97e",
+    "experiments\\runner.py": "61995ee3b8f8123f51baf12fcebb55cb92146f1e4cb76848f1a525a25336af12",
+    "experiments\\sensitivity.py": "22a8f28f036ea7e21fe48e738efff9bcd2bc8a8a3fb83c41d64020b52d02fccd",
+    "experiments\\statistics.py": "4c65f1bad78cf195522c1570064471ed8263a7297f503372f2f787cb546a6493",
+    "experiments\\verify.py": "226ba2ff358d7d1b655b6023f151b044af37bb3638f2cb51022b17bc232328ef",
+    "visualization\\behavior.py": "ddafa88090161c43e6530f982188b9787bf2cce5da6e5a1eb0d93b20b665dd6f",
+    "visualization\\benchmark.py": "38a37151cbce5eece415c75a95e64d9892c06909580ccb402576554cc873386c",
+    "visualization\\distribution.py": "8f3a42cd380f4c6b42578f32f4ae15b102b41c5a2a9eb871b729fbe74e50a401",
+    "visualization\\sensitivity.py": "e4c8b2f9cbffbb11771b3e4b1763ee60d0b18f3a7efd55fa01395b4fabe82091",
+    "config\\config.py": "196f8165dabe0e6168d89ef705693c8e0e908379a891a88a993426c9a09da681"
+  },
+  "parallelism_note": "Eight independent processes by default; per-run wall time includes CPU contention. Prior serial pilot is not a controlled speed comparison."
+}

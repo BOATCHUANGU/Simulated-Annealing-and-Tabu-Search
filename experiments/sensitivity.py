@@ -53,7 +53,7 @@ def run_study(output, instance, algorithm, repetitions, base, customers=100):
     return records
 
 
-def summarize(output, records):
+def summarize(output, records): 
     """距离也按车辆数分组，避免把不同车辆数当成同一比较口径。"""
     groups = defaultdict(list)
     for r in records:
@@ -83,7 +83,7 @@ def summarize(output, records):
 def main():
     parser = argparse.ArgumentParser(description="R101/R104 参数敏感性及邻域实验")
     parser.add_argument("--out", type=Path, default=RESULTS_DIR / "sensitivity")
-    parser.add_argument("--instance", choices=("R101", "R104"), default="R101")
+    parser.add_argument("--instance", default="R101")  # choices=("R101", "R104")
     parser.add_argument("--repetitions", type=int, default=30)
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--iterations", type=int, default=1000)
