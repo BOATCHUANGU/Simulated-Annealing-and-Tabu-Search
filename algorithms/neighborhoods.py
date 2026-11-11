@@ -22,7 +22,7 @@ def generate(order, solution, kind, rng):
     if kind == "swap":
         i, j = rng.sample(range(n), 2)
         a, b = order[i], order[j]
-        candidate[i], candidate[j] = candidate[j], candidate[i]
+        candidate[i], candidate[j] = candidate[j], candidate[i]#swap交换
         pair = ("swap", min(a, b), max(a, b))
         return Move(candidate, min(i, j), (pair,), (pair,))
     if kind == "relocate":

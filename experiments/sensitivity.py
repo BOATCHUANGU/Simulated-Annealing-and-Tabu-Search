@@ -1,13 +1,12 @@
 """任务四：参数敏感性与邻域对比。实验不修改算法实现。"""
 import argparse
-import json
 from collections import defaultdict
 from dataclasses import asdict, replace
 from pathlib import Path
 from statistics import mean, stdev
 from algorithms.common import SearchConfig
 from config.config import DATA_DIR, RESULTS_DIR
-from experiments.runner import run
+from experiments.runner import run, prepare_output, append_record
 from experiments.statistics import write_csv
 from problems.vrptw import VRPTW
 
@@ -30,17 +29,9 @@ def run_study(output, instance, algorithm, repetitions, base, customers=100):
         raise ValueError("重复次数和客户数量必须为正")
     base.validate()
     output = Path(output)
-    output.mkdir(parents=True, exist_ok=True)
     manifest = {"instance": instance, "algorithm": algorithm, "repetitions": repetitions,
                 "customers": customers, "base": asdict(base), "cases": CASES}
-    manifest = json.loads(json.dumps(manifest))
-    path = output / "config.json"
-    if path.exists() and json.loads(path.read_text(encoding="utf-8")) != manifest:
-        raise ValueError("输出目录已有不同实验参数，请使用新目录")
-    if not path.exists():
-        path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
-    raw = output / "runs.jsonl"
-    records = [json.loads(line) for line in raw.read_text(encoding="utf-8").splitlines()] if raw.exists() else []
+    raw, records = prepare_output(output, manifest)
     completed = {(r["factor"], r["level"], r["seed"]) for r in records}
     problem = VRPTW.from_solomon(DATA_DIR / (instance + ".txt"), customers)
     for factor, level, changes in CASES:
@@ -56,8 +47,7 @@ def run_study(output, instance, algorithm, repetitions, base, customers=100):
                       "vehicles": result.vehicles, "distance": result.distance,
                       "runtime": result.runtime, "iterations": result.iterations,
                       "history": result.history}
-            with raw.open("a", encoding="utf-8") as f:
-                f.write(json.dumps(record, ensure_ascii=False) + "\n")
+            append_record(raw, record)
             records.append(record)
             print(f"{factor}={level} seed={seed}: {result.vehicles} vehicles, {result.distance:.2f}, {result.runtime:.2f}s", flush=True)
     return records

@@ -43,40 +43,34 @@ def sa_ts_inner(problem, parameters=None):
     return state.result()
 
 
+def _anneal(state, steps):
+    """执行一段 SA，用于暖启动或停滞后的扰动。"""
+    config = state.config
+    temperature = config.initial_temperature
+    for _ in range(steps):
+        if state.time_expired():
+            break
+        item = candidate(state)
+        if item and accept(state.problem, state.current, item[1], temperature, state.rng):
+            state.update(item[0].order, item[1])
+        state.record()
+        temperature = max(config.min_temperature, temperature * config.cooling)
+
+
 def sa_warm_ts(problem, parameters=None):
     """方案三 b：SA 暖启动、TS 精修，停滞后从最优解 SA 扰动重启。"""
     config = parameters or SearchConfig()
     state = SearchState(problem, config)
     tabu = {}
-    warm_steps = min(config.inner_iterations, config.iterations)
-    temperature = config.initial_temperature
-    for _ in range(warm_steps):
-        if state.time_expired():
-            return state.result()
-        item = candidate(state)
-        if item and accept(problem, state.current, item[1], temperature, state.rng):
-            state.update(item[0].order, item[1])
-        state.record()
-        temperature = max(config.min_temperature, temperature * config.cooling)
+    _anneal(state, min(config.inner_iterations, config.iterations))
     stale = 0
-    iteration = warm_steps
-    while iteration < config.iterations and not state.time_expired():
-        improved = step(state, tabu, iteration)
+    while state.steps < config.iterations and not state.time_expired():
+        improved = step(state, tabu, state.steps)
         stale = 0 if improved else stale + 1
         state.record()
-        iteration += 1
-        if stale >= config.restart_after and iteration < config.iterations:
+        if stale >= config.restart_after and state.steps < config.iterations:
             state.order, state.current = state.best_order[:], state.best
             tabu.clear()
-            temperature = config.initial_temperature
-            for _ in range(min(config.inner_iterations, config.iterations-iteration)):
-                if state.time_expired():
-                    break
-                item = candidate(state)
-                if item and accept(problem, state.current, item[1], temperature, state.rng):
-                    state.update(item[0].order, item[1])
-                state.record()
-                iteration += 1
-                temperature = max(config.min_temperature, temperature * config.cooling)
+            _anneal(state, min(config.inner_iterations, config.iterations - state.steps))
             stale = 0
     return state.result()

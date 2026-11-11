@@ -8,8 +8,9 @@ from algorithms.initial import greedy_order, insertion_order
 
 @dataclass
 class SearchConfig:
+    """一次搜索使用的参数；可通过 seed 和 iterations 控制复现。"""
     seed: int = 0
-    iterations: int = 500
+    iterations: int = 500 
     candidate_count: int = 30
     tabu_tenure: int = 10
     initial_temperature: float = 100.0
@@ -33,6 +34,7 @@ class SearchConfig:
 
 @dataclass
 class SearchResult:
+    """搜索结束后的最优解、历史记录和运行信息。"""
     solution: object
     history: list
     runtime: float
@@ -49,6 +51,7 @@ class SearchResult:
 
 
 def key(solution):
+    """先比较车辆数，再比较距离。"""
     return (solution.vehicles, solution.distance)
 
 
@@ -66,12 +69,16 @@ def accept(problem, current, candidate, temperature, rng):
 
 @dataclass
 class SearchState:
+    """order/current 为当前解；best_order/best 为历史最优解。"""
     problem: object
     config: SearchConfig
+
     order: list = field(init=False)
     current: object = field(init=False)
+
     best_order: list = field(init=False)
     best: object = field(init=False)
+    
     history: list = field(init=False)
     rng: object = field(init=False)
     started: float = field(init=False)
