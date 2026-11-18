@@ -1,30 +1,33 @@
 from algorithms.common import SearchConfig, SearchState, key
-from algorithms.neighborhoods import candidate
+from algorithms.neighborhoods import generate
 
 
 def candidates(state, tabu, iteration): #筛选可行且允许的候选，逐个产生 (移动, 解)。
-    for _ in range(state.config.candidate_count):
-        item = candidate(state)
-        if item is None:
+    for attempt in range(state.config.candidate_count):
+        if state.time_expired():
+            break
+        candidate = generate(state, allow_large_moves=attempt == 0)
+        if candidate is None:
             continue
-        move, solution = item
+        move, solution = candidate
         forbidden = any(tabu.get(attr, 0) > iteration for attr in move.check) #禁忌
         if not forbidden or key(solution) < key(state.best): #藐视
-            yield item
+            yield candidate
 
 
-def commit(state, item, tabu, iteration): #SearchState 提交候选解 更新禁忌表 更新当前搜索状态；提交候选并更新禁忌表  返回是否刷新历史最优。
-    move, solution = item
+def commit(state, candidate, tabu, iteration): #SearchState 提交候选解 更新禁忌表 更新当前搜索状态；提交候选并更新禁忌表  返回是否刷新历史最优。
+    move, solution = candidate
     for attr in move.forbid:
         tabu[attr] = iteration + state.config.tabu_tenure + 1 #SearchConfig
-    return state.update(move.order, solution)
+    return state.update(solution)
 
 
 def step(state, tabu, iteration): #进行一次搜索；执行一轮禁忌搜索 返回是否刷新历史最优。
-    choices = list(candidates(state, tabu, iteration))
-    if not choices:
+    best_candidate = min(candidates(state, tabu, iteration),
+                         key=lambda candidate: key(candidate.solution), default=None)
+    if best_candidate is None:
         return False
-    return commit(state, min(choices, key=lambda item: key(item[1])), tabu, iteration)
+    return commit(state, best_candidate, tabu, iteration)
 
 
 def solve(problem, parameters=None): #运行禁忌搜索 返回包含最优解和运行记录的结果。
@@ -32,7 +35,7 @@ def solve(problem, parameters=None): #运行禁忌搜索 返回包含最优解�
     state = SearchState(problem, config)
     tabu = {}
     for iteration in range(config.iterations):
-        if state.time_expired():
+        if state.stopped():
             break
         step(state, tabu, iteration)
         state.record()

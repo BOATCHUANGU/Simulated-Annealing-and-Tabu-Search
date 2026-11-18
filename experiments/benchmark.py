@@ -33,7 +33,9 @@ def run_benchmark(output, instances, algorithms, repetitions, config, customers=
                     raise RuntimeError(f"无效结果：{instance} {algorithm} {seed}")
                 record = {"status": "ok", "instance": instance, "algorithm": algorithm, "seed": seed,
                           "vehicles": result.vehicles, "distance": result.distance, "runtime": result.runtime,
-                          "iterations": result.iterations, "routes": result.solution.routes, "history": result.history}
+                          "iterations": result.iterations, "routes": result.solution.routes,
+                          "history": result.history, "history_times": result.history_times,
+                          "stop_reason": result.stop_reason, "initial_solutions": result.initial_solutions}
                 append_record(raw, record)
                 print(f"{instance} {algorithm} seed={seed}: {result.vehicles} vehicles, {result.distance:.2f}, {result.runtime:.2f}s", flush=True)
     return output
@@ -46,7 +48,7 @@ def main():
     parser.add_argument("--algorithms", nargs="+", default=list(SOLVERS))  # choices=list(SOLVERS)
     parser.add_argument("--repetitions", type=int, default=30)
     parser.add_argument("--seed", type=int, default=0)
-    parser.add_argument("--iterations", type=int, default=1000)
+    parser.add_argument("--iterations", type=int, default=2**31 - 1, help="可选的迭代上限")
     parser.add_argument("--seconds", type=float, default=1.0, help="每次运行的相同时间上限（秒）")
     parser.add_argument("--candidates", type=int, default=30)
     parser.add_argument("--customers", type=int, default=100)

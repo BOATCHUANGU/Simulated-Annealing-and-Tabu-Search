@@ -1,17 +1,18 @@
 from algorithms.common import SearchConfig, SearchState, accept
-from algorithms.neighborhoods import candidate
+from algorithms.neighborhoods import generate
 
 
 def solve(problem, parameters=None): #运行模拟退火，返回包含最优解和运行记录的结果。
     config = parameters or SearchConfig()
     state = SearchState(problem, config)
-    temperature = config.initial_temperature
-    for _ in range(config.iterations):
-        if state.time_expired() or temperature < config.min_temperature:
+    for iteration in range(config.iterations):
+        if state.stopped():
             break
-        item = candidate(state)
-        if item and accept(problem, state.current, item[1], temperature, state.rng):
-            state.update(item[0].order, item[1])
+        temperature = state.temperature(iteration)
+        candidate = generate(state)
+        if candidate is not None:
+            _, solution = candidate
+            if accept(problem, state.current, solution, temperature, state.rng):
+                state.update(solution)
         state.record()
-        temperature *= config.cooling
-    return state.result("min_temperature" if temperature < config.min_temperature and not state.time_expired() and state.steps < config.iterations else None)
+    return state.result()

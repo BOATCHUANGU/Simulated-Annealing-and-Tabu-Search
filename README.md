@@ -33,6 +33,19 @@ python main.py --algorithm hybrid3 --instance C101 --customers 10 --iterations 2
 
 算法名称：`sa`、`ts`、`hybrid1`、`hybrid2`、`hybrid3`。通过 `experiments.runner.run(problem, name, SearchConfig(...))` 可在代码中使用统一接口；返回值包含最优路径、车辆数、距离、收敛历史和耗时。详细说明见 `任务二汇报.md`。
 
+### RC101 完整实例
+
+```powershell
+py -3.13 main.py --algorithm hybrid3 --instance RC101 --customers 100 --seconds 10 --seed 8
+py -3.13 main.py --algorithm sa --instance RC101 --customers 100 --seconds 140 --seed 24 --fleet-repair --target-vehicles 14 --target-distance 1696.95 --output results/rc101_replay.json
+```
+
+程序打印各构造方法的车辆数、距离、可行性，以及最终路线和停止原因。开启限时后默认按墙钟预算运行，显式指定 `--iterations` 可以同时设置迭代上限。退火降至温度下限后继续搜索。
+
+车辆消除尝试将整条路线的客户重新分配，允许逐出其他客户再插回。跨路线重组包括后缀交换和移出多点再插入。插入位置用前后向时间窗标签检查，候选只重算发生变化的路线。
+
+`--fleet-repair` 在长预算搜索停滞时启用软约束退火，通过暂时允许迟到和超载来探索更少车辆数的排布。候选通过原始约束检查后才交回搜索。设置 `--target-vehicles` 后，达到该车数时继续缩短距离。长预算模式可同时重排多条路线的尾部，最后用原始约束复核。给定 `--target-distance` 后，两项指标达到字典序目标时停止。启发式结果随种子和实际迭代次数波动。
+
 ## 任务三基准实验
 
 ```powershell
