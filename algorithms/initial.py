@@ -1,35 +1,29 @@
-#初始解构造
-import random
+"""用最近客户、插入代价和种子规则构造初始解。"""
 from algorithms.routes import RouteLabels
 
 
-def random_order(problem, seed=0): #随机排列客户，返回不含车场的客户列表。
-    order = sorted(set(problem.customers) - {0})
-    random.Random(seed).shuffle(order)
-    return order
-
-
-def greedy_order(problem): #按最近可行客户构造初始解，返回客户排列。
+def greedy_order(problem):  #按最近可行客户构造初始路线 返回list[int]展开后的客户编号
     remaining = set(problem.customers) - {0}
     routes = []
     while remaining:
         route = []
-        while True:
-            feasible = [node for node in remaining if problem.check_route(route + [node]).feasible]
-            if not feasible:
-                break
+        while remaining:
             last = route[-1] if route else 0
-            node = min(feasible, key=lambda i: (problem.dist[last, i], i))
-            route.append(node)
-            remaining.remove(node)
+            feasible = (node for node in remaining if problem.check_route(route + [node]).feasible)
+            nearest = min(feasible, key=lambda node: (problem.dist[last, node], node), default=None)
+            if nearest is None:
+                break
+            route.append(nearest)
+            remaining.remove(nearest)
         if not route:
             raise ValueError("存在无法由单车服务的客户")
         routes.append(route)
     return [node for route in routes for node in route]
 
 
-def insertion_order(problem): #按时间窗和插入代价构造初始解，返回客户排列。
+def insertion_order(problem):  #按客户截止时间和插入代价构造初始路线 返回list[int]展开后的客户编号
     routes = []
+    # 截止时间早的客户优先安排。
     customers = sorted(set(problem.customers) - {0}, key=lambda i: (problem.customers[i].due, i))
     for node in customers:
         best = None
@@ -52,13 +46,14 @@ def insertion_order(problem): #按时间窗和插入代价构造初始解，返�
     return [node for route in routes for node in route]
 
 
-def sequential_routes(problem, seed_key, time_weight, expired):
+def sequential_routes(problem, seed_key, time_weight, expired):  #按种子规则逐车构造并评价路线 返回Solution初始解或None
     """逐条构造路线，以距离增量和后继延迟选择插入点。"""
     remaining = set(problem.customers) - {0}
     routes = []
     while remaining:
         if expired():
             return None
+        # 每辆车先选一个种子客户，再尝试把路线填满。
         seed = min(remaining, key=lambda node: (seed_key(node), node))
         route = [seed]
         remaining.remove(seed)
@@ -69,13 +64,17 @@ def sequential_routes(problem, seed_key, time_weight, expired):
                 customer = problem.customers[node]
                 for position, extra_distance in label.insertions(node):
                     left, right = label.nodes[position:position + 2]
-                    new_departure = max(label.departures[position] + problem.dist[left, node],
-                                        customer.ready) + customer.service
-                    delay = new_departure + problem.dist[node, right] - problem.dist[left, right] - label.departures[position]
+                    departure = label.departures[position]
+                    old_leg = problem.dist[left, right]
+                    arrival = departure + problem.dist[left, node]
+                    new_departure = max(arrival, customer.ready) + customer.service
+                    delay = new_departure + problem.dist[node, right] - old_leg - departure
                     if position < len(route):
-                        delay -= max(0, problem.customers[right].ready - label.departures[position]
-                                     - problem.dist[left, right])
-                    option = (extra_distance + time_weight * max(0, delay), node, position)
+                        # 后继客户原本要等待的时间可以吸收一部分延迟。
+                        ready = problem.customers[right].ready
+                        delay -= max(0, ready - departure - old_leg)
+                    score = extra_distance + time_weight * max(0, delay)
+                    option = (score, node, position)
                     if best is None or option < best:
                         best = option
             if best is None:

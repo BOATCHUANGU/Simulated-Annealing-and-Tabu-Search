@@ -1,10 +1,10 @@
-#三种方案
+"""三种模拟退火与禁忌搜索的混合方案。"""
 from algorithms.common import SearchConfig, SearchState, accept
-from algorithms.neighborhoods import generate
+from algorithms.sa import anneal_step
 from algorithms.ts import candidates, commit, step
 
 
-def ts_metropolis(problem, parameters=None): #方案一：禁忌筛选后按退火准则接受，返回搜索结果。 	SA 和 TS 每一步一起用
+def ts_metropolis(problem, parameters=None):  #执行先禁忌筛选再退火接受的方案一 返回SearchResult搜索结果
     config = parameters or SearchConfig()
     state = SearchState(problem, config)
     tabu = {}
@@ -13,61 +13,57 @@ def ts_metropolis(problem, parameters=None): #方案一：禁忌筛选后按退�
             break
         temperature = state.temperature(iteration)
         for candidate in candidates(state, tabu, iteration):
-            if accept(problem, state.current, candidate.solution, temperature, state.rng):
+            if accept(state.current, candidate.solution, temperature, state.rng):
                 commit(state, candidate, tabu, iteration)
                 break
         state.record()
     return state.result()
 
 
-def sa_ts_inner(problem, parameters=None): #方案二：外层退火、内层禁忌搜索，返回搜索结果。 	SA 控制外层，TS 在每一层连续搜索
+def sa_ts_inner(problem, parameters=None):  #执行外层退火和内层禁忌搜索的方案二 返回SearchResult搜索结果
     config = parameters or SearchConfig()
     state = SearchState(problem, config)
     tabu = {}
-    iteration = 0
-    while iteration < config.iterations and not state.stopped():
-        temperature = state.temperature(iteration // config.inner_iterations)
+    while state.steps < config.iterations and not state.stopped():
+        # 一个温度层包含若干步 TS，接受判断针对整段搜索的终点。
+        layer = state.steps // config.inner_iterations
+        temperature = state.temperature(layer)
         start_solution = state.current
-        for _ in range(min(config.inner_iterations, config.iterations - iteration)):
+        layer_steps = min(config.inner_iterations, config.iterations - state.steps)
+        for _ in range(layer_steps):
             if state.stopped():
                 break
-            step(state, tabu, iteration)
+            step(state, tabu, state.steps)
             state.record()
-            iteration += 1
-        if not accept(problem, start_solution, state.current, temperature, state.rng): #Metropolis
+        if not accept(start_solution, state.current, temperature, state.rng):
             state.current = start_solution
     return state.result()
 
 
-def _anneal(state, steps): #执行一段退火并更新状态；无返回值。 不重新构造初始解，利用之前搜索得到的解，继续进行模拟退火
-    """暖启动"""
+def _warm_anneal(state, steps):  #在现有状态上执行指定步数的退火暖启动或重启 返回None
     config = state.config
     temperature = config.initial_temperature
     for _ in range(steps):
         if state.stopped():
             break
-        candidate = generate(state)
-        if candidate is not None:
-            _, solution = candidate
-            if accept(state.problem, state.current, solution, temperature, state.rng):
-                state.update(solution)
+        anneal_step(state, temperature)
         state.record()
         temperature = max(config.min_temperature, temperature * config.cooling)
 
 
-def sa_warm_ts(problem, parameters=None): #方案三：退火暖启动、禁忌精修和重启，返回搜索结果  先 SA、后 TS，卡住后再用 SA 扰动
+def sa_warm_ts(problem, parameters=None):  #执行退火暖启动和禁忌精修的方案三 返回SearchResult搜索结果
     config = parameters or SearchConfig()
     state = SearchState(problem, config)
     tabu = {}
-    _anneal(state, min(config.inner_iterations, config.iterations))
-    stale = 0
+    _warm_anneal(state, min(config.inner_iterations, config.iterations))
+    steps_without_improvement = 0
     while state.steps < config.iterations and not state.stopped():
         improved = step(state, tabu, state.steps)
-        stale = 0 if improved else stale + 1
+        steps_without_improvement = 0 if improved else steps_without_improvement + 1
         state.record()
-        if stale >= config.restart_after and state.steps < config.iterations:
+        if steps_without_improvement >= config.restart_after and state.steps < config.iterations:
             state.current = state.best
             tabu.clear()
-            _anneal(state, min(config.inner_iterations, config.iterations - state.steps))
-            stale = 0
+            _warm_anneal(state, min(config.inner_iterations, config.iterations - state.steps))
+            steps_without_improvement = 0
     return state.result()

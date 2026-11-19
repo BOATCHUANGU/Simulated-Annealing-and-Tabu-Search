@@ -1,0 +1,97 @@
+{
+  "instance": "R101",
+  "algorithm": "hybrid1",
+  "repetitions": 30,
+  "customers": 100,
+  "base": {
+    "seed": 0,
+    "iterations": 1000,
+    "candidate_count": 30,
+    "tabu_tenure": 10,
+    "initial_temperature": 100.0,
+    "cooling": 0.98,
+    "min_temperature": 0.001,
+    "inner_iterations": 10,
+    "restart_after": 50,
+    "time_limit": 0.25,
+    "neighborhoods": [
+      "relocate",
+      "swap",
+      "2opt"
+    ]
+  },
+  "cases": [
+    [
+      "tabu_tenure",
+      "5",
+      {
+        "tabu_tenure": 5
+      }
+    ],
+    [
+      "tabu_tenure",
+      "10",
+      {
+        "tabu_tenure": 10
+      }
+    ],
+    [
+      "tabu_tenure",
+      "20",
+      {
+        "tabu_tenure": 20
+      }
+    ],
+    [
+      "candidate_count",
+      "10",
+      {
+        "candidate_count": 10
+      }
+    ],
+    [
+      "candidate_count",
+      "30",
+      {
+        "candidate_count": 30
+      }
+    ],
+    [
+      "candidate_count",
+      "60",
+      {
+        "candidate_count": 60
+      }
+    ],
+    [
+      "neighborhoods",
+      "relocate",
+      {
+        "neighborhoods": [
+          "relocate"
+        ]
+      }
+    ],
+    [
+      "neighborhoods",
+      "relocate+swap",
+      {
+        "neighborhoods": [
+          "relocate",
+          "swap"
+        ]
+      }
+    ],
+    [
+      "neighborhoods",
+      "all",
+      {
+        "neighborhoods": [
+          "relocate",
+          "swap",
+          "2opt"
+        ]
+      }
+    ]
+  ]
+}

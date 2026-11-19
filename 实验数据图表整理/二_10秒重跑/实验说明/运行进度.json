@@ -1,0 +1,13 @@
+{
+  "completed": 1170,
+  "total": 1170,
+  "elapsed_seconds": 993.1,
+  "last": {
+    "instance": "R101",
+    "algorithm": "hybrid1",
+    "seed": 29,
+    "vehicles": 22,
+    "distance": 1878.6021503378531,
+    "stop_reason": "min_temperature"
+  }
+}

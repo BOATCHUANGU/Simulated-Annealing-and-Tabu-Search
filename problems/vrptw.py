@@ -125,35 +125,3 @@ class VRPTW:
         if route:
             routes.append(route)
         return self.evaluate(routes)
-
-    def decode_neighbor(self, order, previous, changed_at):
-        """复用修改点之前的完整路径，仅重新拆分和评价其后部分。"""
-        prefix, details, used = [], [], 0
-        for route, detail in zip(previous.routes, previous.details):
-            # 紧邻修改点的上一条路径可能吸收新的后继，必须重新解码。
-            if used + len(route) >= changed_at:
-                break
-            prefix.append(list(route))
-            details.append(detail)
-            used += len(route)
-        routes, route = prefix, []
-        for node in order[used:]:
-            if route and not self.check_route(route + [node]).feasible:
-                routes.append(route)
-                details.append(self.check_route(route))
-                route = []
-            route.append(node)
-        if route:
-            routes.append(route)
-            details.append(self.check_route(route))
-        expected = set(self.customers) - {0}
-        reason = ""
-        if len(order) != len(expected) or set(order) != expected:
-            reason = "客户重复、缺失或编号无效"
-        elif len(routes) > self.vehicle_limit:
-            reason = "车辆数超限"
-        elif any(not detail.feasible for detail in details):
-            reason = next(detail.reason for detail in details if not detail.feasible)
-        return Solution(
-            not reason, routes, sum(d.distance for d in details), details, reason
-        )

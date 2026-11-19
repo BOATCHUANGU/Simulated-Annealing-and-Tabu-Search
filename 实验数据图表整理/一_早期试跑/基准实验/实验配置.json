@@ -1,0 +1,40 @@
+{
+  "instances": [
+    "C101",
+    "R101",
+    "RC101",
+    "C201",
+    "R201",
+    "RC201"
+  ],
+  "algorithms": [
+    "sa",
+    "ts",
+    "hybrid1",
+    "hybrid2",
+    "hybrid3"
+  ],
+  "repetitions": 30,
+  "customers": 100,
+  "parameters": {
+    "seed": 0,
+    "iterations": 1000,
+    "candidate_count": 30,
+    "tabu_tenure": 10,
+    "initial_temperature": 100.0,
+    "cooling": 0.98,
+    "min_temperature": 0.001,
+    "inner_iterations": 10,
+    "restart_after": 50,
+    "time_limit": 0.25,
+    "neighborhoods": [
+      "relocate",
+      "swap",
+      "2opt"
+    ]
+  },
+  "seed_range": [
+    0,
+    29
+  ]
+}

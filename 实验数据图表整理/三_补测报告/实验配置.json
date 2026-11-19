@@ -1,0 +1,136 @@
+{
+  "python": "3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "workers": 8,
+  "seeds": [
+    0,
+    8,
+    24
+  ],
+  "iterations": 100000,
+  "benchmark_seconds": 10,
+  "sensitivity_seconds": 2,
+  "instances": [
+    "C101",
+    "R101",
+    "RC101",
+    "C201",
+    "R201",
+    "RC201"
+  ],
+  "algorithms": [
+    "sa",
+    "ts",
+    "hybrid1",
+    "hybrid2",
+    "hybrid3"
+  ],
+  "sensitivity_cases": [
+    [
+      "tabu_tenure",
+      "5",
+      {
+        "tabu_tenure": 5
+      }
+    ],
+    [
+      "tabu_tenure",
+      "10",
+      {
+        "tabu_tenure": 10
+      }
+    ],
+    [
+      "tabu_tenure",
+      "20",
+      {
+        "tabu_tenure": 20
+      }
+    ],
+    [
+      "candidate_count",
+      "10",
+      {
+        "candidate_count": 10
+      }
+    ],
+    [
+      "candidate_count",
+      "30",
+      {
+        "candidate_count": 30
+      }
+    ],
+    [
+      "candidate_count",
+      "60",
+      {
+        "candidate_count": 60
+      }
+    ],
+    [
+      "neighborhoods",
+      "relocate",
+      {
+        "neighborhoods": [
+          "relocate"
+        ]
+      }
+    ],
+    [
+      "neighborhoods",
+      "relocate+swap",
+      {
+        "neighborhoods": [
+          "relocate",
+          "swap"
+        ]
+      }
+    ],
+    [
+      "neighborhoods",
+      "all",
+      {
+        "neighborhoods": [
+          "relocate",
+          "swap",
+          "2opt"
+        ]
+      }
+    ],
+    [
+      "neighborhoods",
+      "updated",
+      {}
+    ]
+  ],
+  "defaults": {
+    "tabu_tenure": 10,
+    "candidate_count": 30,
+    "initial_temperature": 100,
+    "cooling": 0.98,
+    "min_temperature": 0.001,
+    "inner_iterations": 10,
+    "restart_after": 50,
+    "fleet_repair": false,
+    "target_vehicles": null
+  },
+  "target_validation": {
+    "runs": 1,
+    "instance": "RC101",
+    "algorithm": "sa",
+    "seed": 24,
+    "seconds": 140.0,
+    "target": [
+      14,
+      1696.95
+    ],
+    "settings": {
+      "fleet_repair": true,
+      "target_vehicles": 14,
+      "target_distance": 1696.95
+    },
+    "source": "results/rc101_reference_match.json",
+    "history_available": false
+  }
+}

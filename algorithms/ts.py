@@ -1,8 +1,9 @@
+"""禁忌搜索：筛选候选、选择最好候选、提交移动。"""
 from algorithms.common import SearchConfig, SearchState, key
 from algorithms.neighborhoods import generate
 
 
-def candidates(state, tabu, iteration): #筛选可行且允许的候选，逐个产生 (移动, 解)。
+def candidates(state, tabu, iteration):  #过滤不可行和未满足藐视准则的禁忌候选 返回generator逐个产出Candidate
     for attempt in range(state.config.candidate_count):
         if state.time_expired():
             break
@@ -10,19 +11,21 @@ def candidates(state, tabu, iteration): #筛选可行且允许的候选，逐个
         if candidate is None:
             continue
         move, solution = candidate
-        forbidden = any(tabu.get(attr, 0) > iteration for attr in move.check) #禁忌
-        if not forbidden or key(solution) < key(state.best): #藐视
+        is_tabu = any(tabu.get(arc, 0) > iteration for arc in move.added_arcs)
+        # 能刷新历史最优的候选允许通过禁忌筛选。
+        if not is_tabu or key(solution) < key(state.best):
             yield candidate
 
 
-def commit(state, candidate, tabu, iteration): #SearchState 提交候选解 更新禁忌表 更新当前搜索状态；提交候选并更新禁忌表  返回是否刷新历史最优。
+def commit(state, candidate, tabu, iteration):  #提交候选并记录删除弧的禁忌期限 返回bool是否刷新历史最优
     move, solution = candidate
-    for attr in move.forbid:
-        tabu[attr] = iteration + state.config.tabu_tenure + 1 #SearchConfig
+    expires_at = iteration + state.config.tabu_tenure + 1
+    for arc in move.removed_arcs:
+        tabu[arc] = expires_at
     return state.update(solution)
 
 
-def step(state, tabu, iteration): #进行一次搜索；执行一轮禁忌搜索 返回是否刷新历史最优。
+def step(state, tabu, iteration):  #选择并提交一轮禁忌搜索中最好的候选 返回bool是否刷新历史最优
     best_candidate = min(candidates(state, tabu, iteration),
                          key=lambda candidate: key(candidate.solution), default=None)
     if best_candidate is None:
@@ -30,7 +33,7 @@ def step(state, tabu, iteration): #进行一次搜索；执行一轮禁忌搜索
     return commit(state, best_candidate, tabu, iteration)
 
 
-def solve(problem, parameters=None): #运行禁忌搜索 返回包含最优解和运行记录的结果。
+def solve(problem, parameters=None):  #运行禁忌搜索 返回SearchResult搜索结果
     config = parameters or SearchConfig()
     state = SearchState(problem, config)
     tabu = {}
